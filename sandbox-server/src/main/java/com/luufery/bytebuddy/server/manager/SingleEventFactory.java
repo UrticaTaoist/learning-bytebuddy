@@ -4,10 +4,14 @@ import com.alibaba.jvm.sandbox.api.event.*;
 import com.alibaba.jvm.sandbox.api.util.UnsafeUtils;
 import sun.misc.Unsafe;
 
+
 import static com.alibaba.jvm.sandbox.api.util.SandboxReflectUtils.unCaughtSetClassDeclaredJavaFieldValue;
 
 /**
  * 单例事件工厂
+ * 这里,sandbox作者使用了Unsafe处理Event,众所周知,Unsafe是不建议使用的,如果目标版本使用了java9+,可以使用官方推荐的java.lang.invoke.VarHandle
+ * VarHandle提供了与Unsafe类似的功能,但更加安全,且在并发场景下有更高的性能.
+ * 但使用VarHandle时需要了解plain、opaque、release/acquire、volatile这几种可见性特性区别.
  */
 class SingleEventFactory {
 
