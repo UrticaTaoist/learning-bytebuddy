@@ -19,6 +19,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <bytebuddy.version>1.12.12</bytebuddy.version>
     </properties>
 
     <dependencies>
