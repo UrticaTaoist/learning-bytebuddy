@@ -34,6 +34,7 @@ public class MyPlugin {
                             JavaModule module) -> builder.visit(Advice.to(TimeMeasurementAdvice.class).on(ElementMatchers.named(TARGET_METHOD)))).installOn(instrumentation);
         System.out.println("=========");
         //这里直接删除自定义的Transformer,下次transform将不会生效
+        //在实际开发中,应当将Transformer缓存起来,待需要卸载时再删除.
         instrumentation.removeTransformer(test);
     }
 
