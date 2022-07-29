@@ -2,26 +2,140 @@ package com.luufery.agent;
 
 
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static com.luufery.agent.SocketServer.socketServerThread;
 
 public class AgentLauncher {
-
-    public static Instrumentation instrumentation;
 
     private static final Map<String/*NAMESPACE*/, SandboxClassLoader> sandboxClassLoaderMap
             = new ConcurrentHashMap<String, SandboxClassLoader>();
 
 
     public static void agentmain(String args, Instrumentation inst) {
-        instrumentation = inst;
 
-        runThread(socketServerThread());
+        install(inst, toFeatureMap(args));
+//        runThread(socketServerThread());
+    }
+
+    private static final String KEY_NAMESPACE = "namespace";
+
+    private static final String KEY_CORE = "core";
+
+    private static final String DEFAULT_NAMESPACE = "default";
+    private static final String DEFAULT_CORE = "simple-core";
+
+
+    /**
+     * 这里我们参考Sandbox的实现方式,把Server放在core里面,这样以保证资源隔离,在agent层只有一个ClassLoader,其他的啥也没有.
+     *
+     * @param instrumentation instrumentation
+     */
+    private static void install(Instrumentation instrumentation, Map<String, String> config) {
+        try {
+            final ClassLoader sandboxClassLoader = loadOrDefineClassLoader(
+                    getNamespace(config),
+                    getCoreJar(config)
+                    // SANDBOX_CORE_JAR_PATH
+            );
+            Class<?> socketServerClass = sandboxClassLoader.loadClass("com.luufery.bytebuddy.core.socket.SocketServer");
+            Object server = socketServerClass.getDeclaredMethod("getInstance").invoke(null);
+            try {
+                Method runServer = socketServerClass.getDeclaredMethod("runServer", Map.class, Instrumentation.class);
+                runServer.invoke(server, config, instrumentation);
+            } catch (Throwable e) {
+                Method destroy = socketServerClass.getDeclaredMethod("destroy");
+                destroy.invoke(server);
+                throw new RuntimeException(e);
+            }
+        } catch (Throwable cause) {
+            uninstall(getNamespace(config));
+            throw new RuntimeException("sandbox attach failed.", cause);
+        }
+
+    }
+
+    private static String getNamespace(final Map<String, String> config) {
+        return getDefault(config, KEY_NAMESPACE, DEFAULT_NAMESPACE);
+    }
+
+
+    private static String getCoreJar(final Map<String, String> config) {
+        String coreJarPath = getDefault(config, KEY_CORE, DEFAULT_CORE);
+        if (isWindows()) {
+            Matcher m = Pattern.compile("(?i)^[/\\\\]([a-z])[/\\\\]").matcher(coreJarPath);
+            if (m.find()) {
+                coreJarPath = m.replaceFirst("$1:/");
+            }
+        }
+        return coreJarPath;
+    }
+
+
+    private static String OS = System.getProperty("os.name").toLowerCase();
+
+    private static boolean isWindows() {
+        return OS.contains("win");
+    }
+
+    private static String getDefault(final Map<String, String> map, final String key, final String defaultValue) {
+        return null != map
+                && !map.isEmpty()
+                ? getDefaultString(map.get(key), defaultValue)
+                : defaultValue;
+    }
+
+    private static Map<String, String> toFeatureMap(final String featureString) {
+        final Map<String, String> featureMap = new LinkedHashMap<String, String>();
+
+        // 不对空字符串进行解析
+        if (isBlankString(featureString)) {
+            return featureMap;
+        }
+
+        // KV对片段数组
+        final String[] kvPairSegmentArray = featureString.split(";");
+        if (kvPairSegmentArray.length <= 0) {
+            return featureMap;
+        }
+
+        for (String kvPairSegmentString : kvPairSegmentArray) {
+            if (isBlankString(kvPairSegmentString)) {
+                continue;
+            }
+            final String[] kvSegmentArray = kvPairSegmentString.split("=");
+            if (kvSegmentArray.length != 2
+                    || isBlankString(kvSegmentArray[0])
+                    || isBlankString(kvSegmentArray[1])) {
+                continue;
+            }
+            featureMap.put(kvSegmentArray[0], kvSegmentArray[1]);
+        }
+
+        return featureMap;
+    }
+
+    private static boolean isNotBlankString(final String string) {
+        return null != string
+                && string.length() > 0
+                && !string.matches("^\\s*$");
+    }
+
+    private static boolean isBlankString(final String string) {
+        return !isNotBlankString(string);
+    }
+
+    private static String getDefaultString(final String string, final String defaultString) {
+        return isNotBlankString(string)
+                ? string
+                : defaultString;
     }
 
     public static synchronized ClassLoader loadOrDefineClassLoader(final String namespace,
@@ -43,6 +157,7 @@ public class AgentLauncher {
 
         return classLoader;
     }
+
     public static synchronized ClassLoader loadOrDefineClassLoader(final String namespace,
                                                                    final String[] coreJars) throws Throwable {
 
@@ -83,13 +198,6 @@ public class AgentLauncher {
         // 关闭SandboxClassLoader
         sandboxClassLoader.closeIfPossible();
         sandboxClassLoaderMap.remove(namespace);
-    }
-
-
-    private static void runThread(Thread t) {
-//        t.setDaemon(true);
-//        t.setContextClassLoader(PluginLoader.getInstance());
-        t.start();
     }
 
 

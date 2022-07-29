@@ -9,11 +9,13 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>simple</module>
+        <module>simple-modules</module>
         <module>common</module>
         <module>simple-bootstrap</module>
         <module>sandbox-server</module>
         <module>sandbox-web-demo</module>
+        <module>simple-core</module>
+        <module>simple-api</module>
     </modules>
 
     <properties>

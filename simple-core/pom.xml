@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>simple-bootstrap</artifactId>
+    <artifactId>simple-core</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -17,17 +17,34 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-agent</artifactId>
-            <version>${bytebuddy.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
         </dependency>
         <dependency>
-            <groupId>sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>sfd</version>
-            <scope>system</scope>
-            <systemPath>${user.home}/Library/Java/JavaVirtualMachines/corretto-1.8.0_312/Contents/Home/lib/tools.jar
-            </systemPath>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.1-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>com.luufery.bytebuddy</groupId>
+            <artifactId>simple-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.luufery.bytebuddy</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
         </dependency>
     </dependencies>
     <build>
@@ -38,22 +55,13 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>attached</goal>
+                            <goal>single</goal>
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <!--                                <outputDirectory>${project.basedir}/plugins</outputDirectory>-->
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <archive>
-                                <manifestEntries>
-                                    <Premain-Class>com.luufery.agent.AgentLauncher</Premain-Class>
-                                    <Agent-Class>com.luufery.agent.AgentLauncher</Agent-Class>
-                                    <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                                    <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                                </manifestEntries>
-                            </archive>
                         </configuration>
                     </execution>
                 </executions>

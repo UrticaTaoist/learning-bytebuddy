@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.Method;
+
 @RestController
 @RequestMapping("simple")
 public class SimpleController {
@@ -13,6 +15,10 @@ public class SimpleController {
     public Object test() {
         String s1 = "sdf";
         String s2 = "fjd";
+
+//        for (Method declaredMethod : SimpleController.class.getDeclaredMethods()) {
+//            System.out.println(declaredMethod.getName());
+//        }
         return inner(s1 + "ddd", "uid" + s2);
     }
 
