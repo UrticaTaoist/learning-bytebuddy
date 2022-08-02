@@ -16,7 +16,7 @@
         <module>sandbox-web-demo</module>
         <module>simple-core</module>
         <module>simple-api</module>
-        <module>simple-api-plugin</module>
+        <module>simple-api-bytebuddy</module>
     </modules>
 
     <properties>

@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>com.luufery.bytebuddy</groupId>
-            <artifactId>simple-api-plugin</artifactId>
+            <artifactId>simple-api-bytebuddy</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

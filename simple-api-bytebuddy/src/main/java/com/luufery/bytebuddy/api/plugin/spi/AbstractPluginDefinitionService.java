@@ -2,14 +2,19 @@ package com.luufery.bytebuddy.api.plugin.spi;
 
 
 import com.luufery.bytebuddy.api.ModuleJar;
+import com.luufery.bytebuddy.api.Spy;
+import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import com.luufery.bytebuddy.api.module.CoreModule;
+import com.luufery.bytebuddy.api.plugin.spy.SpyAdvice;
 import com.luufery.bytebuddy.api.plugin.point.PluginInterceptorPoint;
 import com.luufery.bytebuddy.api.plugin.point.RaspTransformationPoint;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
+import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 
@@ -21,6 +26,10 @@ import java.util.stream.Collectors;
 import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.loadAllPlugins;
 
 public abstract class AbstractPluginDefinitionService implements PluginDefinitionService {
+
+    private final ByteBuddy byteBuddy = new ByteBuddy();
+
+    private final AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
 
     private final Map<String, PluginInterceptorPoint.Builder> interceptorPointMap = new HashMap<>();
 
@@ -55,17 +64,12 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
     }
 
     @Override
-    public Collection<CoreModule> load(ModuleJar moduleJar) throws IOException {
-        Map<String, PluginInterceptorPoint> stringPluginInterceptorPointMap = loadAllPlugins(moduleJar.getClassLoader());
-        AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
-//        defineInterceptors();
-//        System.out.println("interceptorPointMap.size()::" + interceptorPointMap.size());
+    final public Collection<CoreModule> load(ModuleJar moduleJar) throws IOException {
         List<CoreModule> coreModules = new ArrayList<>();
-        System.out.println("stringPluginInterceptorPointMap.size()::" + stringPluginInterceptorPointMap.size());
-        for (PluginInterceptorPoint value : stringPluginInterceptorPointMap.values()) {
+        for (PluginInterceptorPoint value : loadAllPlugins(moduleJar.getClassLoader()).values()) {
             for (RaspTransformationPoint<?> raspTransformationPoint : value.getTransformationPoint()) {
                 System.out.println("advice::::" + raspTransformationPoint.getClassOfAdvice());
-                CoreModule coreModule = new CoreModule();
+
                 ClassFileTransformer classFileTransformer = agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                         .disableClassFormatChanges()
                         .type(ElementMatchers.named(value.getTargetClass()))
@@ -73,18 +77,28 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
                                     TypeDescription type,
                                     ClassLoader loader,
                                     JavaModule module) -> builder.visit(
-                                Advice.to(raspTransformationPoint.getClassOfAdvice())
+                                Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
                                         .on(raspTransformationPoint.getMatcher())))
 
                         .makeRaw();
-                coreModule.setClassLoader(moduleJar.getClassLoader());
-                coreModule.setModuleJar(moduleJar.getModuleJarFile());
-                coreModule.setTransformer(classFileTransformer);
-                coreModule.setTargetClass(value.getTargetClass());
-                coreModules.add(coreModule);
+                coreModules.add(CoreModule.builder()
+                        .moduleJar(moduleJar.getModuleJarFile())
+                        .classLoader(moduleJar.getClassLoader())
+                        .targetClass(value.getTargetClass())
+                        .transformer(classFileTransformer).build()
+                );
             }
         }
         return coreModules;
 
+    }
+
+
+    public Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy) {
+        return byteBuddy.redefine(source).visit(Advice.to(spy)
+                        .on(ElementMatchers.isAnnotatedWith(Advice.OnMethodEnter.class)
+                                .or(ElementMatchers.isAnnotatedWith(Advice.OnMethodExit.class))))
+                .make()
+                .load(source.getClassLoader(), ClassLoadingStrategy.Default.CHILD_FIRST_PERSISTENT).getLoaded();
     }
 }
