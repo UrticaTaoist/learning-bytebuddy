@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.api;
+package com.luufery.bytebuddy.api.module;
 
 import java.io.File;
 

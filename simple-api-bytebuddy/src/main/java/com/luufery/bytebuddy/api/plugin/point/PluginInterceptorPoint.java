@@ -1,7 +1,7 @@
 package com.luufery.bytebuddy.api.plugin.point;
 
 
-import com.luufery.bytebuddy.api.InterceptorPoint;
+import com.luufery.bytebuddy.api.advice.InterceptorPoint;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

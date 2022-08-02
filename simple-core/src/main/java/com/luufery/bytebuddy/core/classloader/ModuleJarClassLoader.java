@@ -1,7 +1,7 @@
 package com.luufery.bytebuddy.core.classloader;
 
 
-import com.luufery.bytebuddy.api.ModuleJar;
+import com.luufery.bytebuddy.api.module.ModuleJar;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

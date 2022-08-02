@@ -15,6 +15,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+/**
+ * 这里暂时使用简易的{@link ServerSocket}完成插件控制,之后可以考虑适配其他的.
+ */
 public class SocketServer {
 
     private final Logger logger = LoggerFactory.getLogger(SocketServer.class);
@@ -119,27 +122,14 @@ public class SocketServer {
 
     private static void doActions(String key) {
 
-        if (key.startsWith("simple01")) {
-            String[] split = key.split(":");
-            String pluginName = split[0];
-            String methodName = split[1];
-            loadJar(pluginName, methodName);
-        } else {
-            //这里使用spi加载模块
-            try {
-                ModuleJarLoader.getInstance().loadModule(key);
-            } catch (IOException e) {
-                System.out.println("============");
-                System.out.println(e.getMessage());
-                System.out.println("============");
-            }
+        //这里使用spi加载模块
+        try {
+            ModuleJarLoader.getInstance().load(key);
+        } catch (IOException e) {
+            System.out.println("============");
+            System.out.println(e.getMessage());
+            System.out.println("============");
         }
-
-
-    }
-
-    private static void loadJar(String pluginName, String methodName) {
-
     }
 
     public void destroy() {
