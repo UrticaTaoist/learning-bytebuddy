@@ -1,7 +1,6 @@
-package com.luufery.bytebuddy.core.module;
+package com.luufery.bytebuddy.api.module;
 
 
-import com.luufery.bytebuddy.api.ModuleException;
 
 import java.util.Collection;
 

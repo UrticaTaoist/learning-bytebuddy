@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.common;
+package com.luufery.bytebuddy.api.plugin;
 
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;

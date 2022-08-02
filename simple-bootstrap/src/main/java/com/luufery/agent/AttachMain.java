@@ -18,6 +18,7 @@ public class AttachMain {
                         "/Users/luufery/workspace/com/luufery/learning-bytebuddy/simple-bootstrap/target/simple-bootstrap-1.0-SNAPSHOT-jar-with-dependencies.jar"
                       ,"core=/Users/luufery/workspace/com/luufery/learning-bytebuddy/simple-core/target/simple-core-1.0-SNAPSHOT-jar-with-dependencies.jar;namespace=default"
                 );
+//                virtualMachine.loadAgent("/Users/luufery/workspace/com/boundaryx/javarasp/dist/cloudrasp-latest/cloudrasp-install.jar");
                 virtualMachine.detach();
                 System.out.println("attach");
 

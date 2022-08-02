@@ -1,6 +1,7 @@
-package com.luufery.bytebuddy.api.point;
+package com.luufery.bytebuddy.api.plugin.point;
 
 
+import com.luufery.bytebuddy.api.InterceptorPoint;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class PluginInterceptorPoint {
+public class PluginInterceptorPoint implements InterceptorPoint {
 
 
     private final String targetClass;

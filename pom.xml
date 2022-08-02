@@ -16,6 +16,7 @@
         <module>sandbox-web-demo</module>
         <module>simple-core</module>
         <module>simple-api</module>
+        <module>simple-api-plugin</module>
     </modules>
 
     <properties>

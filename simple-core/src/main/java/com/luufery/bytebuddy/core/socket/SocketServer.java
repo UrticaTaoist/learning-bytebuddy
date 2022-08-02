@@ -1,7 +1,8 @@
 package com.luufery.bytebuddy.core.socket;
 
-import com.luufery.bytebuddy.core.module.CoreModuleManager;
+import com.luufery.bytebuddy.api.module.CoreModuleManager;
 import com.luufery.bytebuddy.core.module.DefaultCoreModuleManager;
+import com.luufery.bytebuddy.core.module.ModuleJarLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,16 +27,32 @@ public class SocketServer {
     public static Instrumentation instrumentation;
 
 
-    public CoreModuleManager getCoreModuleManager() {
-        return coreModuleManager;
+    public static CoreModuleManager getCoreModuleManager() {
+        if (getInstance().coreModuleManager == null) {
+            synchronized (CoreModuleManager.class) {
+                if (getInstance().coreModuleManager == null) {
+                    return new DefaultCoreModuleManager();
+                }
+            }
+        }
+        return getInstance().coreModuleManager;
     }
+
+    private static volatile SocketServer socketServer;
 
     private SocketServer() {
 
     }
 
     public static SocketServer getInstance() {
-        return new SocketServer();
+        if (socketServer == null) {
+            synchronized (SocketServer.class) {
+                if (socketServer == null) {
+                    return new SocketServer();
+                }
+            }
+        }
+        return socketServer;
     }
 
     public Boolean runServer(Map<String, String> config, Instrumentation instrumentation) {
@@ -43,8 +60,9 @@ public class SocketServer {
 
         System.out.println("启动socket server!!");
 
-        try (ServerSocket serverSocket = new ServerSocket(18018)) {
-            read(serverSocket.accept());
+        try {
+            server = new ServerSocket(18018);
+            read(server.accept());
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -108,6 +126,13 @@ public class SocketServer {
             loadJar(pluginName, methodName);
         } else {
             //这里使用spi加载模块
+            try {
+                ModuleJarLoader.getInstance().loadModule(key);
+            } catch (IOException e) {
+                System.out.println("============");
+                System.out.println(e.getMessage());
+                System.out.println("============");
+            }
         }
 
 

@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.api.point;
+package com.luufery.bytebuddy.api.plugin.point;
 
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import lombok.Getter;

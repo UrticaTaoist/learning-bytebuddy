@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.core.module;
+package com.luufery.bytebuddy.api.plugin;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -21,13 +21,8 @@ public class PluginServiceLoader {
 
 
     public static <T> Collection<T> newServiceInstances(final Class<T> service,ClassLoader classLoader) {
-        System.out.println(service.getName());
-        System.out.println(service.getClassLoader());
         List<T> result = new LinkedList<>();
-        ServiceLoader.load(service, classLoader).forEach((r)->{
-            System.out.println("service::::"+r.getClass().getName());
-            result.add(r);
-        });
+        ServiceLoader.load(service, classLoader).forEach(result::add);
         return result;
     }
 }
