@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.api.plugin;
+package com.luufery.bytebuddy.api.plugin.spi;
 
 import com.luufery.bytebuddy.api.plugin.point.PluginInterceptorPoint;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;

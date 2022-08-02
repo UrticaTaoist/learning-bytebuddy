@@ -2,13 +2,10 @@ package com.luufery.agent.definition;
 
 import com.luufery.agent.advice.DemoMonitor;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
-import com.luufery.bytebuddy.api.plugin.AbstractPluginDefinitionService;
+import com.luufery.bytebuddy.api.plugin.spi.AbstractPluginDefinitionService;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
-import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.kohsuke.MetaInfServices;
-
-import java.lang.instrument.ClassFileTransformer;
 
 @MetaInfServices(PluginDefinitionService.class)
 public class DemoPluginDefinitionService extends AbstractPluginDefinitionService {

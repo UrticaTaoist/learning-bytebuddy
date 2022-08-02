@@ -1,6 +1,7 @@
 package com.luufery.bytebuddy.core.classloader;
 
 
+import com.luufery.bytebuddy.api.ModuleJar;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,7 @@ import static com.luufery.bytebuddy.common.util.SandboxReflectUtils.*;
  *
  * @author luanjia@taobao.com
  */
-public class ModuleJarClassLoader extends RoutingURLClassLoader {
+public class ModuleJarClassLoader extends RoutingURLClassLoader implements ModuleJar {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final File moduleJarFile;
@@ -172,6 +173,11 @@ public class ModuleJarClassLoader extends RoutingURLClassLoader {
 
     public File getModuleJarFile() {
         return moduleJarFile;
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+        return this;
     }
 
     @Override

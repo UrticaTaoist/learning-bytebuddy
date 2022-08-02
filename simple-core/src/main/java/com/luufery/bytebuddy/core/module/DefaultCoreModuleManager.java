@@ -21,7 +21,7 @@ public class DefaultCoreModuleManager implements CoreModuleManager {
     @Override
     public void active(CoreModule coreModule) {
         //TODO 这里应当做一层代理, 使切点可以响应事件.
-        loadedModuleBOMap.put(coreModule.getPoint().getTargetClass(), coreModule);
+//        loadedModuleBOMap.put(coreModule.getPoint().getTargetClass(), coreModule);
 //        for (RaspTransformationPoint<?> raspTransformationPoint : coreModule.getPoint().getTransformationPoint()) {
 //            System.out.println("advice::::" + raspTransformationPoint.getClassOfAdvice());
 //            ClassFileTransformer classFileTransformer = agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)

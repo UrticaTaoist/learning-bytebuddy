@@ -1,6 +1,8 @@
-package com.luufery.bytebuddy.api.plugin;
+package com.luufery.bytebuddy.api.plugin.spi;
 
 
+import com.luufery.bytebuddy.api.ModuleJar;
+import com.luufery.bytebuddy.api.module.CoreModule;
 import com.luufery.bytebuddy.api.plugin.point.PluginInterceptorPoint;
 import com.luufery.bytebuddy.api.plugin.point.RaspTransformationPoint;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
@@ -16,7 +18,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.luufery.bytebuddy.api.plugin.SpiPluginLauncher.loadAllPlugins;
+import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.loadAllPlugins;
 
 public abstract class AbstractPluginDefinitionService implements PluginDefinitionService {
 
@@ -53,16 +55,17 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
     }
 
     @Override
-    public Collection<ClassFileTransformer> load(ClassLoader classLoader) throws IOException {
-        Map<String, PluginInterceptorPoint> stringPluginInterceptorPointMap = loadAllPlugins(classLoader);
+    public Collection<CoreModule> load(ModuleJar moduleJar) throws IOException {
+        Map<String, PluginInterceptorPoint> stringPluginInterceptorPointMap = loadAllPlugins(moduleJar.getClassLoader());
         AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
 //        defineInterceptors();
 //        System.out.println("interceptorPointMap.size()::" + interceptorPointMap.size());
-        List<ClassFileTransformer> classFileTransformerList = new ArrayList<>();
+        List<CoreModule> coreModules = new ArrayList<>();
         System.out.println("stringPluginInterceptorPointMap.size()::" + stringPluginInterceptorPointMap.size());
         for (PluginInterceptorPoint value : stringPluginInterceptorPointMap.values()) {
             for (RaspTransformationPoint<?> raspTransformationPoint : value.getTransformationPoint()) {
                 System.out.println("advice::::" + raspTransformationPoint.getClassOfAdvice());
+                CoreModule coreModule = new CoreModule();
                 ClassFileTransformer classFileTransformer = agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                         .disableClassFormatChanges()
                         .type(ElementMatchers.named(value.getTargetClass()))
@@ -74,10 +77,14 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
                                         .on(raspTransformationPoint.getMatcher())))
 
                         .makeRaw();
-                classFileTransformerList.add(classFileTransformer);
+                coreModule.setClassLoader(moduleJar.getClassLoader());
+                coreModule.setModuleJar(moduleJar.getModuleJarFile());
+                coreModule.setTransformer(classFileTransformer);
+                coreModule.setTargetClass(value.getTargetClass());
+                coreModules.add(coreModule);
             }
         }
-        return classFileTransformerList;
+        return coreModules;
 
     }
 }

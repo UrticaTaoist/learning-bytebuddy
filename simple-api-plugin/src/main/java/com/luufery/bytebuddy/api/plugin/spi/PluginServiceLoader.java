@@ -1,4 +1,4 @@
-package com.luufery.bytebuddy.api.plugin;
+package com.luufery.bytebuddy.api.plugin.spi;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

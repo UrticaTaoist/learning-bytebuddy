@@ -4,6 +4,7 @@ import com.luufery.bytebuddy.api.InterceptorPoint;
 import lombok.Data;
 
 import java.io.File;
+import java.lang.instrument.ClassFileTransformer;
 
 @Data
 public class CoreModule {
@@ -14,5 +15,6 @@ public class CoreModule {
 
     private ClassLoader classLoader;
 
-    private InterceptorPoint point;
+    private ClassFileTransformer transformer;
+
 }

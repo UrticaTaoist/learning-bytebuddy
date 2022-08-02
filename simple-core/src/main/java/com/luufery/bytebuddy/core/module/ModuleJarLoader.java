@@ -37,13 +37,13 @@ public class ModuleJarLoader {
         ModuleJarClassLoader moduleJarClassLoader = new ModuleJarClassLoader(file);
         ServiceLoader<PluginDefinitionService> services = ServiceLoader.load(PluginDefinitionService.class, moduleJarClassLoader);
         for (PluginDefinitionService service : services) {
-            Collection<ClassFileTransformer> load = service.load(moduleJarClassLoader);
-            System.out.println("transformer::" + load);
-            for (ClassFileTransformer transformer : load) {
-                instrumentation.addTransformer(transformer, true);
+            Collection<CoreModule> modules = service.load(moduleJarClassLoader);
+            System.out.println("transformer::" + modules);
+            for (CoreModule coreModule : modules) {
+                instrumentation.addTransformer(coreModule.getTransformer(), true);
                 try {
-                    instrumentation.retransformClasses(Class.forName("com.luufery.rasp.test.SimpleController"));
-                    instrumentation.removeTransformer(transformer);
+                    instrumentation.retransformClasses(Class.forName(coreModule.getTargetClass()));
+                    instrumentation.removeTransformer(coreModule.getTransformer());
                 } catch (UnmodifiableClassException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
