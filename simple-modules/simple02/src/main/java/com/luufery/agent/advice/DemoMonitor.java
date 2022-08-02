@@ -16,8 +16,14 @@ public class DemoMonitor implements RaspAdvice {
     @Advice.OnMethodExit(onThrowable = Throwable.class)
     public static void exit(@Advice.Enter long start,
                             @Advice.Origin String origin,
-                            @Advice.Return(readOnly = false, typing = DYNAMIC) String body) {
-        System.out.println("我出去啦::::" + start);
-        body += "::::使用SPI??";
+                            @Advice.Return(readOnly = false, typing = DYNAMIC) String body,
+                            @Advice.Thrown(readOnly = false) Throwable throwable
+                            ) {
+        if (throwable != null)
+            System.out.println(throwable.getMessage());
+        body += "::::使用SPI??....";
     }
+
+
+
 }

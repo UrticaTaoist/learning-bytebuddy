@@ -11,15 +11,17 @@ import java.lang.reflect.Method;
 @RequestMapping("simple")
 public class SimpleController {
 
+
     @GetMapping
     public Object test() {
         String s1 = "sdf";
         String s2 = "fjd";
 
-//        for (Method declaredMethod : SimpleController.class.getDeclaredMethods()) {
-//            System.out.println(declaredMethod.getName());
-//        }
+        for (Method declaredMethod : SimpleController.class.getDeclaredMethods()) {
+            System.out.println(declaredMethod.getName());
+        }
         return inner(s1 + "ddd", "uid" + s2);
+//        throw new RuntimeException("啊?");
     }
 
     private Object inner(String s1, String s2) {

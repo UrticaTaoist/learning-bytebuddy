@@ -3,6 +3,7 @@ package com.luufery.bytebuddy.core.module;
 import com.luufery.bytebuddy.api.module.CoreModule;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import com.luufery.bytebuddy.core.classloader.ModuleJarClassLoader;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import static com.luufery.bytebuddy.core.socket.SocketServer.instrumentation;
 /**
  * 这里主要管理jar包,也包括{@link ModuleJarClassLoader}的创建与卸载
  */
+@Slf4j
 public class ModuleJarLoader {
 
     private static volatile ModuleJarLoader loader;
@@ -51,7 +53,7 @@ public class ModuleJarLoader {
                         //TODO 这里我们在reTransform的同时就remove掉了,这个操作可以发生在unload方法中,我们这里为了测试方便直接删除了.
                         instrumentation.removeTransformer(coreModule.getTransformer());
                     } catch (UnmodifiableClassException | ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        log.warn("module 加载失败,targetClass:{},message:{}",coreModule.getTargetClass(),e.getMessage());
                     }
                 }
             }

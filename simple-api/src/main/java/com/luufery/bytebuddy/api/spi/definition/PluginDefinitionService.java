@@ -19,6 +19,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
 
     /**
      * 通过独立jar包加载模块,在约定里,一个模块目前只允许修改一个类呢,因为我给的key...就
+     *
      * @param moduleJar 主要包含类加载器
      * @return 主要返回一个transformer集合和目标Class
      * @throws IOException
@@ -27,10 +28,13 @@ public interface PluginDefinitionService extends AgentTypedSPI {
 
     /**
      * 这个方法用于织入间谍类,来实现组件间通信和准入
+     *
      * @param source 在这里特指模块Advice,这里不限于是bytebuddy还是javassist,具体自己实现去吧.
-     * @param spy 间谍类,同样的, 不限定技术栈,但SpyHandle必须一致奥! 但我还没想好该怎么限制..
+     * @param spy    间谍类,同样的, 不限定技术栈,但SpyHandle必须一致奥! 但我还没想好该怎么限制..
      * @return 返回一个重新编译的类
      */
-    Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy);
+    default Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy) {
+        throw new RuntimeException("spy notfound");
+    }
 
 }

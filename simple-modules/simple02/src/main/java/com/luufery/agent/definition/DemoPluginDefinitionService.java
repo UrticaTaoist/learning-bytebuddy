@@ -1,9 +1,11 @@
 package com.luufery.agent.definition;
 
+import com.luufery.agent.advice.ConstructorMonitor;
 import com.luufery.agent.advice.DemoMonitor;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import com.luufery.bytebuddy.api.plugin.spi.AbstractPluginDefinitionService;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.kohsuke.MetaInfServices;
 
@@ -22,6 +24,11 @@ public class DemoPluginDefinitionService extends AbstractPluginDefinitionService
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
                 .build()
         ;
+//        defineInterceptor("com.luufery.rasp.test.TestClass")
+//                .on(MethodDescription::isConstructor)
+//                .implement(ConstructorMonitor.class)
+//                .build()
+//        ;
     }
 
     @Override
