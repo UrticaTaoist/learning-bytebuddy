@@ -1,15 +1,11 @@
 package com.luufery.bytebuddy.core.module;
 
 import com.luufery.bytebuddy.api.module.CoreModule;
-import com.luufery.bytebuddy.api.module.CoreModuleManager;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import com.luufery.bytebuddy.core.classloader.ModuleJarClassLoader;
-import com.luufery.bytebuddy.core.socket.SocketServer;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.*;
 

@@ -6,6 +6,9 @@ import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * 这是以前使用的SPI加载器,稍加改动,删除了类加载部分,只保留ServiceLoader.
+ */
 public class SpiPluginLauncher {
 
 //    public static Map<String, PluginInterceptorPoint> interceptorPointMap = new HashMap<>();
@@ -15,11 +18,6 @@ public class SpiPluginLauncher {
         Map<String, PluginInterceptorPoint> pointMap = new HashMap<>();
 
         loadPluginDefinitionServices(new HashSet<>(), pointMap, classLoader);
-
-
-        System.out.println("?????????");
-        System.out.println(pointMap.size());
-        System.out.println("?????????");
 
         return pointMap;
 //        interceptorPointMap = ImmutableMap.<String, PluginInterceptorPoint>builder().putAll(pointMap).build();
