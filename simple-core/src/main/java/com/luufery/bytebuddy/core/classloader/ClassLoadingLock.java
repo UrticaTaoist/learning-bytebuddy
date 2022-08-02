@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 类加载锁
+ *
+ * @author luanjia@taobao.com
  */
 class ClassLoadingLock {
 
