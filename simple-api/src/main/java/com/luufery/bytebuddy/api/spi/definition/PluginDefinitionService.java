@@ -24,7 +24,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      * @return 主要返回一个transformer集合和目标Class
      * @throws IOException
      */
-    Collection<CoreModule> load(ModuleJar moduleJar) throws IOException;
+    Collection<CoreModule> load() throws IOException;
 
     /**
      * 这个方法用于织入间谍类,来实现组件间通信和准入
@@ -36,5 +36,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
     default Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy) {
         throw new RuntimeException("spy notfound");
     }
+
+    void undefineInterceptor(final String classNameOfTarget);
 
 }

@@ -5,7 +5,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 @RestController
 @RequestMapping("simple")
@@ -25,6 +30,18 @@ public class SimpleController {
     }
 
     private Object inner(String s1, String s2) {
+//        ZipInputStream
+//        public ZipEntry getNextEntry() throws IOException {
+        //()Ljava/util/zip/ZipEntry;
+//        ZipFile
+//        public InputStream getInputStream(ZipEntry entry)
+//        (Ljava/util/zip/ZipEntry;)Ljava/io/InputStream;
+
+//        org.apache.catalina.core.StandardService
+        //stopInternal
+//        void stopInternal()
+        //();
+
 
         String s3 = s1 + s2;
         return s3 + ">>";

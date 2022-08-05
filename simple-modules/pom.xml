@@ -14,6 +14,7 @@
     <modules>
         <module>simple01</module>
         <module>simple02</module>
+        <module>simple03</module>
     </modules>
 
     <properties>

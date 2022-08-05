@@ -1,7 +1,9 @@
 package com.luufery.bytebuddy.api.module;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
@@ -16,10 +18,14 @@ public class CoreModule {
 
     private String targetClass;
 
-    private File moduleJar;
-
     private ClassLoader classLoader;
 
     private ClassFileTransformer transformer;
+
+    public void clear(){
+        this.targetClass = null;
+        this.classLoader = null;
+        this.transformer = null;
+    }
 
 }

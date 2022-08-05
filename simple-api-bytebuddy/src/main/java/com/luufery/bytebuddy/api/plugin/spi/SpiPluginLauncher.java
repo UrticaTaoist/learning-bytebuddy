@@ -30,7 +30,7 @@ public class SpiPluginLauncher {
                 .forEach(each -> buildPluginInterceptorPointMap(each, pointMap));
     }
 
-    private static void buildPluginInterceptorPointMap(final PluginDefinitionService pluginDefinitionService, final Map<String, PluginInterceptorPoint> pointMap) {
+    public static void buildPluginInterceptorPointMap(final PluginDefinitionService pluginDefinitionService, final Map<String, PluginInterceptorPoint> pointMap) {
         AbstractPluginDefinitionService definitionService = (AbstractPluginDefinitionService) pluginDefinitionService;
         definitionService.install().forEach(each -> {
             String target = each.getTargetClass();
@@ -42,6 +42,11 @@ public class SpiPluginLauncher {
                 pointMap.put(target, each);
             }
         });
+    }
+
+    public static void buildPluginInterceptorPoints(final PluginDefinitionService pluginDefinitionService, final Set<PluginInterceptorPoint> points) {
+        AbstractPluginDefinitionService definitionService = (AbstractPluginDefinitionService) pluginDefinitionService;
+        points.addAll(definitionService.install());
     }
 
 

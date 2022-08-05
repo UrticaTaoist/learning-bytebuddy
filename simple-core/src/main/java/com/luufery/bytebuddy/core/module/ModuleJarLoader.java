@@ -19,6 +19,9 @@ import static com.luufery.bytebuddy.core.socket.SocketServer.instrumentation;
 @Slf4j
 public class ModuleJarLoader {
 
+
+    private static final Map<String, CoreModule> coreModuleMap = new HashMap<>();
+
     private static volatile ModuleJarLoader loader;
 
     public static ModuleJarLoader getInstance() {
@@ -44,34 +47,60 @@ public class ModuleJarLoader {
         ModuleJarClassLoader moduleJarClassLoader = new ModuleJarClassLoader(file);
         ServiceLoader<PluginDefinitionService> services = ServiceLoader.load(PluginDefinitionService.class, moduleJarClassLoader);
         try {
-            for (PluginDefinitionService service : services) {
-                Collection<CoreModule> modules = service.load(moduleJarClassLoader);
+            Iterator<PluginDefinitionService> iterator = services.iterator();
+            while (iterator.hasNext()) {
+                PluginDefinitionService next = iterator.next();
+                Collection<CoreModule> modules = next.load();
                 for (CoreModule coreModule : modules) {
                     instrumentation.addTransformer(coreModule.getTransformer(), true);
                     try {
                         instrumentation.retransformClasses(Class.forName(coreModule.getTargetClass()));
-                        //TODO 这里我们在reTransform的同时就remove掉了,这个操作可以发生在unload方法中,我们这里为了测试方便直接删除了.
-                        instrumentation.removeTransformer(coreModule.getTransformer());
+//                        //TODO 这里我们在reTransform的同时就remove掉了,这个操作可以发生在unload方法中,我们这里为了测试方便直接删除了.
+//                        instrumentation.removeTransformer(coreModule.getTransformer());
+                        coreModule.setClassLoader(moduleJarClassLoader);
+                        coreModuleMap.put(name, coreModule);
+                        System.out.println(coreModuleMap.size());
                     } catch (UnmodifiableClassException | ClassNotFoundException e) {
-                        log.warn("module 加载失败,targetClass:{},message:{}",coreModule.getTargetClass(),e.getMessage());
+                        log.warn("module 加载失败,targetClass:{},message:{}", coreModule.getTargetClass(), e.getMessage());
                     }
                 }
+                next.undefineInterceptor("com.luufery.rasp.test.SimpleController");
+                iterator.remove();
+                modules.clear();
             }
-        }finally {
-            //TODO 这里同上, 我们在之后也将在unload中卸载.
-            moduleJarClassLoader.closeIfPossible();
 
+        } finally {
+            //TODO 这里同上, 我们在之后也将在unload中卸载.
+//            moduleJarClassLoader.closeIfPossible();
+//            System.gc();
         }
 
 
-
     }
 
-    public void unload() {
+    public void unload(String name) {
+        if (!coreModuleMap.containsKey(name)) {
+            return;
+        }
+        CoreModule coreModule = coreModuleMap.remove(name);
+        instrumentation.removeTransformer(coreModule.getTransformer());
+        if (coreModule.getClassLoader() instanceof ModuleJarClassLoader) {
+            ((ModuleJarClassLoader) coreModule.getClassLoader()).closeIfPossible();
+        }
+        String targetClass = coreModule.getTargetClass();
 
+        try {
+            instrumentation.retransformClasses(Class.forName(targetClass));
+        } catch (UnmodifiableClassException | ClassNotFoundException e) {
+            log.warn("reTransform failed", e);
+        }
+        coreModule.clear();
+        coreModule = null;
+        System.out.println("啊?");
+//        System.gc();
     }
 
-    public void unloadAll(){
+    public void unloadAll() {
 
     }
 

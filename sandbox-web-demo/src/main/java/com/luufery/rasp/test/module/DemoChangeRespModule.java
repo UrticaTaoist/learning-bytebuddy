@@ -18,12 +18,12 @@ public class DemoChangeRespModule {
         this.moduleEventWatcher = moduleEventWatcher;
     }
 
-    public void changeResp(){
-        new EventWatchBuilder(moduleEventWatcher).onClass(CLASS_NAME).onBehavior(METHOD_NAME).onWatch(new AdviceListener(){
+    public void changeResp() {
+        new EventWatchBuilder(moduleEventWatcher).onClass(CLASS_NAME).onBehavior(METHOD_NAME).onWatch(new AdviceListener() {
 
             protected void afterReturning(Advice advice) throws Throwable {
                 System.out.println("afterReturning");
-                ProcessController.returnImmediately(advice.getReturnObj() +": now changed");
+                ProcessController.returnImmediately(advice.getReturnObj() + ": now changed");
             }
 
         });

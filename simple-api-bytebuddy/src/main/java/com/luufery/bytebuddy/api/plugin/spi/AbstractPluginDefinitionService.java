@@ -24,16 +24,17 @@ import java.lang.instrument.ClassFileTransformer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.loadAllPlugins;
+import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.*;
 
 @Slf4j
 public abstract class AbstractPluginDefinitionService implements PluginDefinitionService {
 
-    private final ByteBuddy byteBuddy = new ByteBuddy();
 
-    private final AgentBuilder.Default agentBuilder = new AgentBuilder.Default();
+//    private final Map<String, PluginInterceptorPoint.Builder> interceptorPointMap = new HashMap<>();
 
-    private final Map<String, PluginInterceptorPoint.Builder> interceptorPointMap = new HashMap<>();
+    private String targetClass;
+
+    private final Set<PluginInterceptorPoint.Builder> interceptorPoints = new HashSet<>();
 
     /**
      * 自定义拦截器处理拦截点
@@ -47,7 +48,12 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
      */
     public final Collection<PluginInterceptorPoint> install() {
         defineInterceptors();
-        return interceptorPointMap.values().stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
+//        return interceptorPointMap.values().stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
+        try {
+            return interceptorPoints.stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
+        } finally {
+            interceptorPoints.clear();
+        }
     }
 
     /**
@@ -56,52 +62,59 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
      * @param classNameOfTarget class
      * @return 拦截点构建器
      */
-    protected final PluginInterceptorPoint.Builder defineInterceptor(final String classNameOfTarget) {
-        if (interceptorPointMap.containsKey(classNameOfTarget)) {
-            return interceptorPointMap.get(classNameOfTarget);
-        }
+    public final PluginInterceptorPoint.Builder defineInterceptor(final String classNameOfTarget) {
+//        if (interceptorPointMap.containsKey(classNameOfTarget)) {
+//            return interceptorPointMap.get(classNameOfTarget);
+//        }
         PluginInterceptorPoint.Builder builder = PluginInterceptorPoint.intercept(classNameOfTarget);
-        interceptorPointMap.put(classNameOfTarget, builder);
+        //TODO 这里的设计,需要明确只有一个target
+        this.targetClass = classNameOfTarget;
+//        interceptorPointMap.put(classNameOfTarget, builder);
+        interceptorPoints.add(builder);
         return builder;
     }
 
+    public final void undefineInterceptor(final String classNameOfTarget) {
+//        interceptorPointMap.remove(classNameOfTarget);
+        interceptorPoints.clear();
+    }
+
     @Override
-    final public Collection<CoreModule> load(ModuleJar moduleJar) {
+    final public Collection<CoreModule> load() {
         List<CoreModule> coreModules = new ArrayList<>();
-        try {
-            for (PluginInterceptorPoint value : loadAllPlugins(moduleJar.getClassLoader()).values()) {
-                for (RaspTransformationPoint<?> raspTransformationPoint : value.getTransformationPoint()) {
-                    log.debug("advice loading::{}", raspTransformationPoint.getClassOfAdvice());
-
-                    ClassFileTransformer classFileTransformer = agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                            .disableClassFormatChanges()
-                            .type(ElementMatchers.named(value.getTargetClass()))
-                            .transform((DynamicType.Builder<?> builder,
-                                        TypeDescription type,
-                                        ClassLoader loader,
-                                        JavaModule module) -> builder.visit(
-                                    Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
-                                            .on(raspTransformationPoint.getMatcher())))
-
-                            .makeRaw();
-                    coreModules.add(CoreModule.builder()
-                            .moduleJar(moduleJar.getModuleJarFile())
-                            .classLoader(moduleJar.getClassLoader())
-                            .targetClass(value.getTargetClass())
-                            .transformer(classFileTransformer).build()
-                    );
-                }
+        Collection<PluginInterceptorPoint> points = this.install();
+        AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default().with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .disableClassFormatChanges()
+                .type(ElementMatchers.named(this.targetClass));
+        AgentBuilder.Identified.Extendable transform = null;
+        for (PluginInterceptorPoint point : points) {
+            for (RaspTransformationPoint<?> raspTransformationPoint : point.getTransformationPoint()) {
+                transform = narrowable
+                        .transform((DynamicType.Builder<?> builder,
+                                    TypeDescription type,
+                                    ClassLoader loader,
+                                    JavaModule module) -> builder.visit(
+                                Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
+                                        .on(raspTransformationPoint.getMatcher())));
             }
-        } catch (IOException e) {
-            log.warn("CoreModule加载失败", e);
+            if (transform != null) {
+                point.getTransformationPoint().clear();
+                coreModules.add(CoreModule.builder()
+//                            .moduleJar(moduleJar.getModuleJarFile())
+                        .targetClass(targetClass)
+                        .transformer(transform.makeRaw()).build());
+
+            }
+
         }
+        points.clear();
         return coreModules;
 
     }
 
 
     public Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy) {
-        return byteBuddy.redefine(source).visit(Advice.to(spy)
+        return new ByteBuddy().redefine(source).visit(Advice.to(spy)
                         .on(ElementMatchers.isAnnotatedWith(Advice.OnMethodEnter.class)
                                 .or(ElementMatchers.isAnnotatedWith(Advice.OnMethodExit.class))))
                 .make()

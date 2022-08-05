@@ -63,15 +63,19 @@ public class SocketServer {
 
         System.out.println("启动socket server!!");
 
-        try {
-            server = new ServerSocket(18018);
-            read(server.accept());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        //这里暂时先这样,还得改.
-        coreModuleManager = new DefaultCoreModuleManager();
+        Thread thread = new Thread(() -> {
+            try {
+                server = new ServerSocket(18018);
+                read(server.accept());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //这里暂时先这样,还得改.
+            coreModuleManager = new DefaultCoreModuleManager();
+        });
+        thread.setDaemon(true);
+        thread.start();
+
         return true;
 
     }
@@ -124,7 +128,20 @@ public class SocketServer {
 
         //这里使用spi加载模块
         try {
-            ModuleJarLoader.getInstance().load(key);
+            String[] split = key.split(":");
+            String action = split[0];
+            String plugin = split[1];
+            switch (action) {
+                case "load": {
+                    ModuleJarLoader.getInstance().load(plugin);
+
+                    break;
+                }
+                case "unload": {
+                    ModuleJarLoader.getInstance().unload(plugin);
+
+                }
+            }
         } catch (IOException e) {
             System.out.println("============");
             System.out.println(e.getMessage());
@@ -140,5 +157,9 @@ public class SocketServer {
                 logger.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
+    }
+
+    public static class MyThread extends Thread {
+
     }
 }

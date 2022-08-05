@@ -1,7 +1,6 @@
 package com.luufery.bytebuddy.core.classloader;
 
 
-import com.luufery.bytebuddy.api.module.ModuleJar;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +29,7 @@ import static com.luufery.bytebuddy.common.util.SandboxReflectUtils.*;
  *
  * @author luanjia@taobao.com
  */
-public class ModuleJarClassLoader extends RoutingURLClassLoader implements ModuleJar {
+public class ModuleJarClassLoader extends RoutingURLClassLoader  {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final File moduleJarFile;
@@ -122,7 +121,7 @@ public class ModuleJarClassLoader extends RoutingURLClassLoader implements Modul
     }
 
     public void closeIfPossible() {
-        onJarUnLoadCompleted();
+//        onJarUnLoadCompleted();
         try {
 
             // 如果是JDK7+的版本, URLClassLoader实现了Closeable接口，直接调用即可
@@ -173,11 +172,6 @@ public class ModuleJarClassLoader extends RoutingURLClassLoader implements Modul
 
     public File getModuleJarFile() {
         return moduleJarFile;
-    }
-
-    @Override
-    public ClassLoader getClassLoader() {
-        return this;
     }
 
     @Override
