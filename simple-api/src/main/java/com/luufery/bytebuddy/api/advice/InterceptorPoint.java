@@ -9,5 +9,5 @@ public interface InterceptorPoint {
      * 标注目标类
      * @return 目标类
      */
-    String getTargetClass();
+    String[] getTargetClass();
 }

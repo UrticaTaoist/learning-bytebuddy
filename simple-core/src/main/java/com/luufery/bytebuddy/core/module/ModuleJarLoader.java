@@ -47,13 +47,6 @@ public class ModuleJarLoader {
         ModuleJarClassLoader moduleJarClassLoader = new ModuleJarClassLoader(file);
         ServiceLoader<PluginDefinitionService> services = ServiceLoader.load(PluginDefinitionService.class, moduleJarClassLoader);
         Iterator<PluginDefinitionService> iterator = services.iterator();
-        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-            if (clazz.getName().equals("java.nio.file.Files")) {
-                cache = clazz;
-
-                System.out.println("有Files");
-            }
-        }
         while (iterator.hasNext()) {
             PluginDefinitionService next = iterator.next();
             Collection<CoreModule> modules = next.load(instrumentation);

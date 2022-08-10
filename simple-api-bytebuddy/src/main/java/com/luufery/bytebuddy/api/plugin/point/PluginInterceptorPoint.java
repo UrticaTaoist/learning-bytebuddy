@@ -19,21 +19,16 @@ import java.util.List;
 public class PluginInterceptorPoint implements InterceptorPoint {
 
 
-    public String getTargetClass() {
-        //TODO 这里还需要这个接口吗
-        return targetClass.toString();
-    }
-
-    private final ElementMatcher.Junction<TypeDescription> targetClass;
+    private final String[] targetClass;
 
     private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoint;
 
     public static PluginInterceptorPoint createDefault() {
-        return new PluginInterceptorPoint(ElementMatchers.is(Object.class), Collections.emptyList());
+        return new PluginInterceptorPoint(new String[0], Collections.emptyList());
     }
 
 
-    public static Builder intercept(final ElementMatcher.Junction<TypeDescription> classNameOfTarget) {
+    public static Builder intercept(final String[] classNameOfTarget) {
         return new Builder(classNameOfTarget);
     }
 
@@ -41,9 +36,9 @@ public class PluginInterceptorPoint implements InterceptorPoint {
 
         private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoints = new ArrayList<>();
 
-        private final ElementMatcher.Junction<TypeDescription> targetClass;
+        private final String[] targetClass;
 
-        private Builder(final ElementMatcher.Junction<TypeDescription> classNameOfTarget) {
+        private Builder(final String[] classNameOfTarget) {
             this.targetClass = classNameOfTarget;
         }
 

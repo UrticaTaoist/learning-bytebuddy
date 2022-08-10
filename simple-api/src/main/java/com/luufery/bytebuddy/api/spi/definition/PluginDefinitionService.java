@@ -27,6 +27,10 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      */
     Collection<CoreModule> load(Instrumentation instrumentation) throws IOException;
 
+    default String[] preLoadClass() {
+        return new String[0];
+    }
+
     /**
      * 这个方法用于织入间谍类,来实现组件间通信和准入
      *

@@ -17,7 +17,7 @@ public class DemoPluginDefinitionService extends AbstractPluginDefinitionService
 
     @Override
     public void defineInterceptors() {
-        defineInterceptor(ElementMatchers.named(SCHEMA_METADATA_LOADER_CLASS))
+        defineInterceptor(new String[]{SCHEMA_METADATA_LOADER_CLASS})
                 .on(ElementMatchers.named(SCHEMA_METADATA_LOADER_METHOD_NAME))
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
                 .build()

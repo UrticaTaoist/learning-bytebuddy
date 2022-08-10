@@ -17,8 +17,7 @@ public class DemoPluginDefinitionService extends AbstractPluginDefinitionService
 
     @Override
     public void defineInterceptors() {
-        defineInterceptor(isSupersTypeOf("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"))
-
+        defineInterceptor(new String[]{"jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"})
                 .on(named("doGet").or(named("doPost")))
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
                 .build()
@@ -36,4 +35,7 @@ public class DemoPluginDefinitionService extends AbstractPluginDefinitionService
     }
 
 
+    public String[] preLoadClass() {
+        return new String[]{"jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"};
+    }
 }
