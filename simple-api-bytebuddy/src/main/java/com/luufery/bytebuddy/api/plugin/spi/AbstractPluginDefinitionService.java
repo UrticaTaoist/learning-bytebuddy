@@ -89,6 +89,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
         AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .disableClassFormatChanges()
+                .ignore(ElementMatchers.none())
                 .type(this.targetClass);
         AgentBuilder.Identified.Extendable transform = null;
         for (PluginInterceptorPoint point : points) {
