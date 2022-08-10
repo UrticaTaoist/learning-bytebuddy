@@ -16,15 +16,17 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.*;
+//import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.*;
 
 @Slf4j
 public abstract class AbstractPluginDefinitionService implements PluginDefinitionService {
@@ -32,7 +34,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
 
 //    private final Map<String, PluginInterceptorPoint.Builder> interceptorPointMap = new HashMap<>();
 
-    private String targetClass;
+    private ElementMatcher.Junction<TypeDescription> targetClass;
 
     private final Set<PluginInterceptorPoint.Builder> interceptorPoints = new HashSet<>();
 
@@ -62,7 +64,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
      * @param classNameOfTarget class
      * @return 拦截点构建器
      */
-    public final PluginInterceptorPoint.Builder defineInterceptor(final String classNameOfTarget) {
+    public final PluginInterceptorPoint.Builder defineInterceptor(final ElementMatcher.Junction<TypeDescription> classNameOfTarget) {
 //        if (interceptorPointMap.containsKey(classNameOfTarget)) {
 //            return interceptorPointMap.get(classNameOfTarget);
 //        }
@@ -80,12 +82,14 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
     }
 
     @Override
-    final public Collection<CoreModule> load() {
+    final public Collection<CoreModule> load(Instrumentation instrumentation) {
+
         List<CoreModule> coreModules = new ArrayList<>();
         Collection<PluginInterceptorPoint> points = this.install();
-        AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default().with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+        AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default()
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .disableClassFormatChanges()
-                .type(ElementMatchers.named(this.targetClass));
+                .type(this.targetClass);
         AgentBuilder.Identified.Extendable transform = null;
         for (PluginInterceptorPoint point : points) {
             for (RaspTransformationPoint<?> raspTransformationPoint : point.getTransformationPoint()) {
@@ -98,10 +102,16 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
                                         .on(raspTransformationPoint.getMatcher())));
             }
             if (transform != null) {
+                List<Class<?>> targetClasses = new ArrayList<>();
+                for (Class<?> loadedClass : instrumentation.getAllLoadedClasses()) {
+                    if (targetClass.matches(TypeDescription.ForLoadedType.of(loadedClass))) {
+                        targetClasses.add(loadedClass);
+                    }
+                }
+
                 point.getTransformationPoint().clear();
                 coreModules.add(CoreModule.builder()
-//                            .moduleJar(moduleJar.getModuleJarFile())
-                        .targetClass(targetClass)
+                        .targetClass(targetClasses.toArray(new Class[0]))
                         .transformer(transform.makeRaw()).build());
 
             }

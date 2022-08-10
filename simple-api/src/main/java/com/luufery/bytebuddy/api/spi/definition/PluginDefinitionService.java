@@ -8,6 +8,7 @@ import com.luufery.bytebuddy.api.module.CoreModule;
 import com.luufery.bytebuddy.api.spi.type.AgentTypedSPI;
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.util.Collection;
 
 /**
@@ -24,7 +25,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      * @return 主要返回一个transformer集合和目标Class
      * @throws IOException
      */
-    Collection<CoreModule> load() throws IOException;
+    Collection<CoreModule> load(Instrumentation instrumentation) throws IOException;
 
     /**
      * 这个方法用于织入间谍类,来实现组件间通信和准入

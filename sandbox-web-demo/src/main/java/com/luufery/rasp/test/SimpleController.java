@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 @RestController
 @RequestMapping("simple")
-public class SimpleController {
+public final class SimpleController {
 
 
     @GetMapping
@@ -52,4 +53,11 @@ public class SimpleController {
         return Utils.utils01();
     }
 
+
+    @GetMapping("file")
+    public Object file() throws IOException {
+//        Files files = new Files();
+        Files.newOutputStream(null,null);
+        return"df";
+    }
 }

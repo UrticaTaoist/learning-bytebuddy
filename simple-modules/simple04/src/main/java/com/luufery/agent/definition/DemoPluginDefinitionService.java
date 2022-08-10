@@ -1,26 +1,25 @@
 package com.luufery.agent.definition;
 
-import com.luufery.agent.advice.ConstructorMonitor;
-import com.luufery.agent.advice.DemoMonitor;
+import com.luufery.agent.advice.Demo3Monitor;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import com.luufery.bytebuddy.api.plugin.spi.AbstractPluginDefinitionService;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.kohsuke.MetaInfServices;
 
+import static com.luufery.bytebuddy.api.plugin.util.TypeUtils.isSupersTypeOf;
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
 @MetaInfServices(PluginDefinitionService.class)
 public class DemoPluginDefinitionService extends AbstractPluginDefinitionService {
-    private static final String SCHEMA_METADATA_LOADER_CLASS = "com.luufery.rasp.test.SimpleController";
 
-    private static final String SCHEMA_METADATA_LOADER_METHOD_NAME = "test";
-
-    private static final Class<? extends RaspAdvice> SCHEMA_METADATA_LOADER_ADVICE_CLASS = DemoMonitor.class;
+    private static final Class<? extends RaspAdvice> SCHEMA_METADATA_LOADER_ADVICE_CLASS = Demo3Monitor.class;
 
     @Override
     public void defineInterceptors() {
-        defineInterceptor(ElementMatchers.named(SCHEMA_METADATA_LOADER_CLASS))
-                .on(ElementMatchers.named(SCHEMA_METADATA_LOADER_METHOD_NAME))
+        defineInterceptor(isSupersTypeOf("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"))
+
+                .on(named("doGet").or(named("doPost")))
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
                 .build()
         ;

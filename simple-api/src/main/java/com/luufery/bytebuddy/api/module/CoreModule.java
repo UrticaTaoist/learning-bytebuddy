@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
+import java.util.List;
 
 /**
  * 这里的设计延续了alibaba-sandbox的风格,但很明显粒度变细了,但又忽略了方法粒度. 主要是因为我目前懒得细分.
@@ -16,7 +17,7 @@ import java.lang.instrument.ClassFileTransformer;
 @Builder
 public class CoreModule {
 
-    private String targetClass;
+    private Class<?>[] targetClass;
 
     private ClassLoader classLoader;
 

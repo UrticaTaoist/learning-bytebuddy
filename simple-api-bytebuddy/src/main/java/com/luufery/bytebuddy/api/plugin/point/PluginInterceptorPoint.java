@@ -6,7 +6,9 @@ import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,16 +19,21 @@ import java.util.List;
 public class PluginInterceptorPoint implements InterceptorPoint {
 
 
-    private final String targetClass;
+    public String getTargetClass() {
+        //TODO 这里还需要这个接口吗
+        return targetClass.toString();
+    }
+
+    private final ElementMatcher.Junction<TypeDescription> targetClass;
 
     private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoint;
 
     public static PluginInterceptorPoint createDefault() {
-        return new PluginInterceptorPoint("", Collections.emptyList());
+        return new PluginInterceptorPoint(ElementMatchers.is(Object.class), Collections.emptyList());
     }
 
 
-    public static Builder intercept(final String classNameOfTarget) {
+    public static Builder intercept(final ElementMatcher.Junction<TypeDescription> classNameOfTarget) {
         return new Builder(classNameOfTarget);
     }
 
@@ -34,9 +41,9 @@ public class PluginInterceptorPoint implements InterceptorPoint {
 
         private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoints = new ArrayList<>();
 
-        private final String targetClass;
+        private final ElementMatcher.Junction<TypeDescription> targetClass;
 
-        private Builder(final String classNameOfTarget) {
+        private Builder(final ElementMatcher.Junction<TypeDescription> classNameOfTarget) {
             this.targetClass = classNameOfTarget;
         }
 
