@@ -8,6 +8,7 @@ import net.bytebuddy.utility.JavaModule;
 
 public class AgentListener implements AgentBuilder.Listener {
 
+
     @Override
     public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
 
@@ -16,6 +17,13 @@ public class AgentListener implements AgentBuilder.Listener {
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
         WeavingClassLog.INSTANCE.log(typeDescription, dynamicType);
+//        System.out.println("================");
+//        if (classLoader != null)
+//            System.out.println(classLoader.getClass().getName());
+//        if (module != null)
+//            System.out.println(module.getActualName());
+//        System.out.println(dynamicType);
+//        System.out.println("================");
     }
 
     @Override

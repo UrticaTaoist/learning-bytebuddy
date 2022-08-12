@@ -7,19 +7,10 @@ import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAM
 
 public class Demo2Monitor implements RaspAdvice {
 
-    @Advice.OnMethodEnter
-    public static long enter() {
-        System.out.println("我进来啦!");
-        throw new RuntimeException("测试");
-    }
 
     @Advice.OnMethodExit(onThrowable = Throwable.class)
-    public static void exit(@Advice.Enter long start,
-                            @Advice.Origin String origin,
-                            @Advice.Return(readOnly = false, typing = DYNAMIC) String body,
-                            @Advice.Thrown(readOnly = false) Throwable throwable
-    ) {
-
+    public static void exit() {
+        System.out.println("在这里退出了");
     }
 
 }

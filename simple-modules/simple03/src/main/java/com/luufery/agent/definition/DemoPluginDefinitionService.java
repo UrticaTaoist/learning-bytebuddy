@@ -7,26 +7,19 @@ import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.kohsuke.MetaInfServices;
 
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
 @MetaInfServices(PluginDefinitionService.class)
 public class DemoPluginDefinitionService extends AbstractPluginDefinitionService {
-    private static final String SCHEMA_METADATA_LOADER_CLASS = "com.luufery.rasp.test.SimpleController";
-
-    private static final String SCHEMA_METADATA_LOADER_METHOD_NAME = "test";
 
     private static final Class<? extends RaspAdvice> SCHEMA_METADATA_LOADER_ADVICE_CLASS = Demo2Monitor.class;
 
     @Override
     public void defineInterceptors() {
-        defineInterceptor(new String[]{SCHEMA_METADATA_LOADER_CLASS})
-                .on(ElementMatchers.named(SCHEMA_METADATA_LOADER_METHOD_NAME))
+        defineInterceptor("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet")
+                .on(named("doGet").or(named("doPost")))
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
-                .build()
-        ;
-//        defineInterceptor("com.luufery.rasp.test.TestClass")
-//                .on(MethodDescription::isConstructor)
-//                .implement(ConstructorMonitor.class)
-//                .build()
-//        ;
+                .build();
     }
 
     @Override

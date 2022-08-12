@@ -18,6 +18,7 @@
         <module>simple-api</module>
         <module>simple-api-bytebuddy</module>
         <module>single</module>
+        <module>simple-starter</module>
     </modules>
 
     <properties>

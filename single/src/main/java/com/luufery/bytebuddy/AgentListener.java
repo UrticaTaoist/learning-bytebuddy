@@ -32,6 +32,9 @@ public class AgentListener implements AgentBuilder.Listener {
 
     @Override
     public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+        System.out.println("?????");
+        System.out.println(typeName);
+        System.out.println("?????");
 
     }
 }

@@ -34,29 +34,32 @@ public class AgentLauncher {
             ElementMatcher.Junction<TypeDescription> subTypeOf = null;
 
             System.out.println(aClass.getName());
-            AgentBuilder.Default agentBuilder = new AgentBuilder.Default(new ByteBuddy());
+            AgentBuilder agentBuilder = new AgentBuilder.Default(new ByteBuddy());
 //            ClassFileTransformer transformer =
-            agentBuilder
+            agentBuilder = agentBuilder
                     .with(new AgentListener())
                     .with(AgentBuilder.InjectionStrategy.Disabled.INSTANCE)
                     .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
 //                    .with(AgentBuilder.Listener.StreamWriting.toSystemOut())
-                    .ignore(ElementMatchers.none())
-                    .disableClassFormatChanges()
-                    .type(ElementMatchers.named("java.nio.file.Files"))
+                    .ignore(none())
+                    .disableClassFormatChanges();
+
+            agentBuilder = agentBuilder.type(ElementMatchers.named("java.nio.file.Files"))
 
                     .transform((builder, typeDescription, classLoader, module)
                             -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("newOutputStream"))))
-
-                    .type(ElementMatchers.named("com.luufery.rasp.test.SimpleController"))
+            ;
+            agentBuilder = agentBuilder.type(ElementMatchers.named("com.luufery.rasp.test.SimpleController"))
                     .transform((builder, typeDescription, classLoader, module)
                             -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("test"))))
 
+            ;
 
-                    .type(isSupersTypeOf("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"))
+            agentBuilder = agentBuilder.type(isSupersTypeOf("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"))
                     .transform((builder, typeDescription, classLoader, module)
                             -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("doGet").or(ElementMatchers.named("doPost")))))
-                    .installOn(Bootstrap.instrumentation);
+            ;
+            agentBuilder.installOn(Bootstrap.instrumentation);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

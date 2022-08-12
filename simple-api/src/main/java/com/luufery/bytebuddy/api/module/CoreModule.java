@@ -23,10 +23,13 @@ public class CoreModule {
 
     private ClassFileTransformer transformer;
 
+    private String name;
+
     public void clear(){
         this.targetClass = null;
         this.classLoader = null;
         this.transformer = null;
+        this.name = null;
     }
 
 }

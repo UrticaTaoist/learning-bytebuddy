@@ -25,7 +25,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      * @return 主要返回一个transformer集合和目标Class
      * @throws IOException
      */
-    Collection<CoreModule> load(Instrumentation instrumentation) throws IOException;
+    CoreModule load(Instrumentation instrumentation) throws IOException;
 
     default String[] preLoadClass() {
         return new String[0];
@@ -42,6 +42,6 @@ public interface PluginDefinitionService extends AgentTypedSPI {
         throw new RuntimeException("spy notfound");
     }
 
-    void undefineInterceptor(final String classNameOfTarget);
+    void undefineInterceptor();
 
 }

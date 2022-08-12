@@ -44,28 +44,25 @@ public class ModuleJarLoader {
     public void load(String name) throws IOException {
         //TODO 这里需要把魔法值替换为配置变量.
         File file = new File("/Users/luufery/workspace/com/luufery/learning-bytebuddy/simple-modules/" + name + "/target/" + name + "-1.0-SNAPSHOT-jar-with-dependencies.jar");
+
+
         ModuleJarClassLoader moduleJarClassLoader = new ModuleJarClassLoader(file);
         ServiceLoader<PluginDefinitionService> services = ServiceLoader.load(PluginDefinitionService.class, moduleJarClassLoader);
-        Iterator<PluginDefinitionService> iterator = services.iterator();
-        while (iterator.hasNext()) {
-            PluginDefinitionService next = iterator.next();
-            Collection<CoreModule> modules = next.load(instrumentation);
-            for (CoreModule coreModule : modules) {
-                instrumentation.addTransformer(coreModule.getTransformer(), true);
-                try {
 
-                    instrumentation.retransformClasses(coreModule.getTargetClass());
+        for (PluginDefinitionService next : services) {
 
-                    coreModule.setClassLoader(moduleJarClassLoader);
-                    coreModuleMap.put(name, coreModule);
-                } catch (UnmodifiableClassException e) {
-                    log.warn("module 加载失败,targetClass:{},message:{}", coreModule.getTargetClass(), e.getMessage());
-                    System.out.printf("module 加载失败,targetClass:%s,message:%s\n", Arrays.toString(coreModule.getTargetClass()), e.getMessage());
-                }
+            CoreModule coreModule = next.load(instrumentation);
+//          instrumentation.addTransformer(coreModule.getTransformer(), true);
+            try {
+
+//              instrumentation.retransformClasses(coreModule.getTargetClass());
+                coreModule.setClassLoader(moduleJarClassLoader);
+                coreModuleMap.put(name, coreModule);
+
+            } catch (Exception e) {
+                log.warn("module 加载失败,targetClass:{},message:{}", coreModule.getTargetClass(), e.getMessage());
             }
-            next.undefineInterceptor("com.luufery.rasp.test.SimpleController");
-//            iterator.remove();
-            modules.clear();
+            next.undefineInterceptor();
         }
 
 
@@ -87,7 +84,6 @@ public class ModuleJarLoader {
             log.warn("reTransform failed", e);
         }
         coreModule.clear();
-        coreModule = null;
         System.out.println("啊?");
 //        System.gc();
     }

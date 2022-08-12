@@ -5,6 +5,7 @@ import com.luufery.bytebuddy.api.module.ModuleJar;
 import com.luufery.bytebuddy.api.Spy;
 import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import com.luufery.bytebuddy.api.module.CoreModule;
+import com.luufery.bytebuddy.api.module.RedefinitionHolder;
 import com.luufery.bytebuddy.api.plugin.spy.SpyAdvice;
 import com.luufery.bytebuddy.api.plugin.point.PluginInterceptorPoint;
 import com.luufery.bytebuddy.api.plugin.point.RaspTransformationPoint;
@@ -12,6 +13,7 @@ import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
@@ -26,6 +28,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.luufery.bytebuddy.api.plugin.spi.MyAgentBuilder.typeMatch;
 import static com.luufery.bytebuddy.api.plugin.util.TypeUtils.*;
 
 //import static com.luufery.bytebuddy.api.plugin.spi.SpiPluginLauncher.*;
@@ -36,7 +39,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
 
 //    private final Map<String, PluginInterceptorPoint.Builder> interceptorPointMap = new HashMap<>();
 
-    private String[] targetClass;
+//    private final List<String> targetClass = new ArrayList<>();
 
     private final Set<PluginInterceptorPoint.Builder> interceptorPoints = new HashSet<>();
 
@@ -66,73 +69,51 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
      * @param classNameOfTarget class
      * @return 拦截点构建器
      */
-    public final PluginInterceptorPoint.Builder defineInterceptor(final String[] classNameOfTarget) {
-//        if (interceptorPointMap.containsKey(classNameOfTarget)) {
-//            return interceptorPointMap.get(classNameOfTarget);
-//        }
+    public final PluginInterceptorPoint.Builder defineInterceptor(final String... classNameOfTarget) {
         PluginInterceptorPoint.Builder builder = PluginInterceptorPoint.intercept(classNameOfTarget);
-        //TODO 这里的设计,需要明确只有一个target
-        this.targetClass = classNameOfTarget;
-//        interceptorPointMap.put(classNameOfTarget, builder);
+
+//        this.targetClass.addAll(Arrays.asList(classNameOfTarget));
         interceptorPoints.add(builder);
         return builder;
     }
 
-    public final void undefineInterceptor(final String classNameOfTarget) {
+    public final void undefineInterceptor() {
 //        interceptorPointMap.remove(classNameOfTarget);
         interceptorPoints.clear();
     }
 
     @Override
-    final public Collection<CoreModule> load(Instrumentation instrumentation) {
+    final public CoreModule load(Instrumentation instrumentation) {
 
 
-        List<CoreModule> coreModules = new ArrayList<>();
         Collection<PluginInterceptorPoint> points = this.install();
         Class<?>[] allLoadedClasses = instrumentation.getAllLoadedClasses();
-        ElementMatcher.Junction<TypeDescription> elementMatcher = typeMatch(allLoadedClasses, this.targetClass);
 
-        AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default()
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .disableClassFormatChanges()
-                .ignore(ElementMatchers.none())
-                .type(elementMatcher);
-        AgentBuilder.Identified.Extendable transform = null;
+
+        MyAgentBuilder myAgentBuilder = new MyAgentBuilder(this.getType());
+
         for (PluginInterceptorPoint point : points) {
-            for (RaspTransformationPoint<?> raspTransformationPoint : point.getTransformationPoint()) {
-                transform = narrowable
-                        .transform((DynamicType.Builder<?> builder,
-                                    TypeDescription type,
-                                    ClassLoader loader,
-                                    JavaModule module) -> builder.visit(
-                                Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
-                                        .on(raspTransformationPoint.getMatcher())));
-            }
-            if (transform != null) {
-                List<Class<?>> targetClasses = new ArrayList<>();
-                for (Class<?> loadedClass : allLoadedClasses) {
-                    if (elementMatcher.matches(TypeDescription.ForLoadedType.of(loadedClass))) {
-                        targetClasses.add(loadedClass);
-                    }
-                }
-                for (String loadClass : preLoadClass()) {
-                    try {
-                        Class<?> aClass = Class.forName(loadClass);
-                        targetClasses.add(aClass);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                }
-                point.getTransformationPoint().clear();
-                coreModules.add(CoreModule.builder()
-                        .targetClass(targetClasses.toArray(new Class[0]))
-                        .transformer(transform.makeRaw()).build());
 
-            }
+            ElementMatcher.Junction<TypeDescription> elementMatcher = typeMatch(allLoadedClasses, point.getTargetClass());
+
+            myAgentBuilder.attach(elementMatcher, point.getTransformationPoint()).entity();
+
+            point.getTransformationPoint().clear();
 
         }
         points.clear();
-        return coreModules;
+
+        ResettableClassFileTransformer transformer = myAgentBuilder.entity().installOn(instrumentation);
+
+        try {
+
+            return CoreModule.builder()
+                    .targetClass(RedefinitionHolder.getLoadedClass(this.getType()).toArray(new Class[0]))
+                    .name(this.getType())
+                    .transformer(transformer).build();
+        }finally {
+            RedefinitionHolder.clear(this.getType());
+        }
 
     }
 

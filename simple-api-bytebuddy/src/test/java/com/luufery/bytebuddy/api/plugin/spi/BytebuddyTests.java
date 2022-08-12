@@ -5,6 +5,7 @@ import com.luufery.bytebuddy.api.plugin.spy.SpyAdvice;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Test;
 
@@ -62,5 +63,11 @@ public class BytebuddyTests {
             declaredMethod.invoke(null);
             System.out.println("========");
         }
+    }
+
+    @Test
+    public void test06(){
+        System.out.println(ElementMatchers.none() == (ElementMatchers.none()));
+
     }
 }
