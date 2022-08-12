@@ -19,9 +19,9 @@ public class AgentConfiguration {
 
     private String applicationName;
 
-    private Set<String> ignoredPluginNames = new HashSet<>();
+    private Set<String> ignoredPluginNames = new HashSet<String>();
 
-    private Map<String, PluginConfiguration> plugins = new HashMap<>();
+    private Map<String, PluginConfiguration> plugins = new HashMap<String,PluginConfiguration>();
 
 
 

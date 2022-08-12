@@ -216,8 +216,8 @@ class SandboxClassLoader extends URLClassLoader {
 //    }
 
 
-    private String classNameToPath(final String className) {
-        return String.join("", className.replace(".", "/"), ".class");
-    }
+//    private String classNameToPath(final String className) {
+//        return String.join("", className.replace(".", "/"), ".class");
+//    }
 
 }

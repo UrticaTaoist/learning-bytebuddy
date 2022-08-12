@@ -11,10 +11,6 @@
 
     <artifactId>simple03</artifactId>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.kohsuke.metainf-services</groupId>
@@ -34,6 +30,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+
             </plugin>
         </plugins>
     </build>

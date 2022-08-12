@@ -24,7 +24,7 @@ public class PluginInterceptorPoint implements InterceptorPoint {
     private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoint;
 
     public static PluginInterceptorPoint createDefault() {
-        return new PluginInterceptorPoint(new String[0], Collections.emptyList());
+        return new PluginInterceptorPoint(new String[0], Collections.<RaspTransformationPoint<? extends RaspAdvice>>emptyList());
     }
 
 
@@ -34,7 +34,7 @@ public class PluginInterceptorPoint implements InterceptorPoint {
 
     public static final class Builder {
 
-        private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoints = new ArrayList<>();
+        private final List<RaspTransformationPoint<? extends RaspAdvice>> transformationPoints = new ArrayList<RaspTransformationPoint<? extends RaspAdvice>>();
 
         private final String[] targetClass;
 
@@ -70,7 +70,7 @@ public class PluginInterceptorPoint implements InterceptorPoint {
             }
 
             public Builder build() {
-                builder.transformationPoints.add(new RaspTransformationPoint<>(matcher, classOfAdvice));
+                builder.transformationPoints.add(new RaspTransformationPoint<RaspAdvice>(matcher, classOfAdvice));
                 return builder;
             }
         }

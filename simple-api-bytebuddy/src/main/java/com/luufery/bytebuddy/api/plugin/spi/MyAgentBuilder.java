@@ -53,13 +53,15 @@ public class MyAgentBuilder {
         return this;
     }
 
-    private AgentBuilder.Transformer parseTransformer(RaspTransformationPoint<?> raspTransformationPoint) {
-        return (DynamicType.Builder<?> builder,
-                TypeDescription type,
-                ClassLoader loader,
-                JavaModule module) -> builder.visit(
-                Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
-                        .on(raspTransformationPoint.getMatcher()));
+    private AgentBuilder.Transformer parseTransformer(final RaspTransformationPoint<?> raspTransformationPoint) {
+        return new Transformer() {
+            @Override
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                return builder.visit(
+                        Advice.to(loadSpy(raspTransformationPoint.getClassOfAdvice(), SpyAdvice.class))
+                                .on(raspTransformationPoint.getMatcher()));
+            }
+        };
     }
 
     public AgentBuilder entity() {

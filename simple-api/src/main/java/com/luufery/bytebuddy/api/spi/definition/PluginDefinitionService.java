@@ -27,9 +27,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      */
     CoreModule load(Instrumentation instrumentation) throws IOException;
 
-    default String[] preLoadClass() {
-        return new String[0];
-    }
+    String[] preLoadClass() ;
 
     /**
      * 这个方法用于织入间谍类,来实现组件间通信和准入
@@ -38,9 +36,7 @@ public interface PluginDefinitionService extends AgentTypedSPI {
      * @param spy    间谍类,同样的, 不限定技术栈,但SpyHandle必须一致奥! 但我还没想好该怎么限制..
      * @return 返回一个重新编译的类
      */
-    default Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy) {
-        throw new RuntimeException("spy notfound");
-    }
+    Class<? extends RaspAdvice> loadSpy(Class<? extends RaspAdvice> source, Class<? extends Spy> spy);
 
     void undefineInterceptor();
 

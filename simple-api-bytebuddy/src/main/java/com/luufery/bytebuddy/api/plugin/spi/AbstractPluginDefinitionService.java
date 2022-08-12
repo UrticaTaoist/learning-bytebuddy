@@ -41,7 +41,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
 
 //    private final List<String> targetClass = new ArrayList<>();
 
-    private final Set<PluginInterceptorPoint.Builder> interceptorPoints = new HashSet<>();
+    private final Set<PluginInterceptorPoint.Builder> interceptorPoints = new HashSet<PluginInterceptorPoint.Builder>();
 
     /**
      * 自定义拦截器处理拦截点
@@ -57,7 +57,12 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
         defineInterceptors();
 //        return interceptorPointMap.values().stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
         try {
-            return interceptorPoints.stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
+            List<PluginInterceptorPoint> points = new ArrayList<PluginInterceptorPoint>();
+            for (PluginInterceptorPoint.Builder interceptorPoint : interceptorPoints) {
+                points.add(interceptorPoint.install());
+            }
+            return points;
+//            return interceptorPoints.stream().map(PluginInterceptorPoint.Builder::install).collect(Collectors.toList());
         } finally {
             interceptorPoints.clear();
         }
@@ -111,7 +116,7 @@ public abstract class AbstractPluginDefinitionService implements PluginDefinitio
                     .targetClass(RedefinitionHolder.getLoadedClass(this.getType()).toArray(new Class[0]))
                     .name(this.getType())
                     .transformer(transformer).build();
-        }finally {
+        } finally {
             RedefinitionHolder.clear(this.getType());
         }
 

@@ -5,9 +5,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,13 +169,18 @@ public class AgentLauncher {
 
         // 如果未启动则重新加载
         else {
-            classLoader = new SandboxClassLoader(namespace, Arrays.stream(coreJars).map(path -> {
-                try {
-                    return new URL("file:" + path);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                }
-            }).toArray(URL[]::new));
+//            classLoader = new SandboxClassLoader(namespace, Arrays.stream(coreJars).map(path -> {
+//                try {
+//                    return new URL("file:" + path);
+//                } catch (MalformedURLException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }).toArray(URL[]::new));
+            URL[] urls = new URL[coreJars.length];
+            for (int i = 0; i < coreJars.length; i++) {
+                urls[i] = new URL("file:" + coreJars[i]);
+            }
+            classLoader = new SandboxClassLoader(namespace, urls);
             sandboxClassLoaderMap.put(namespace, classLoader);
         }
 

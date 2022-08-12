@@ -20,9 +20,11 @@ public class PluginServiceLoader {
      */
 
 
-    public static <T> Collection<T> newServiceInstances(final Class<T> service,ClassLoader classLoader) {
-        List<T> result = new LinkedList<>();
-        ServiceLoader.load(service, classLoader).forEach(result::add);
+    public static <T> Collection<T> newServiceInstances(final Class<T> service, ClassLoader classLoader) {
+        List<T> result = new LinkedList<T>();
+        for (T t : ServiceLoader.load(service, classLoader)) {
+            result.add(t);
+        }
         return result;
     }
 }
