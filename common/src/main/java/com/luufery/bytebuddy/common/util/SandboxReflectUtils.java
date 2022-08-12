@@ -97,30 +97,30 @@ public class SandboxReflectUtils {
      * @throws InvocationTargetException 目标方法调用发生异常
      * @throws IllegalAccessException    目标方法不可进入
      */
-    public static Class<?> defineClass(final ClassLoader loader,
-                                       final String javaClassName,
-                                       final byte[] classByteArray) throws InvocationTargetException, IllegalAccessException {
-
-        final Method defineClassMethod =
-                unCaughtGetClassDeclaredJavaMethod(ClassLoader.class, "defineClass", String.class, byte[].class, int.class, int.class);
-
-        synchronized (defineClassMethod) {
-            final boolean acc = defineClassMethod.isAccessible();
-            try {
-                defineClassMethod.setAccessible(true);
-                return (Class<?>) defineClassMethod.invoke(
-                        loader,
-                        javaClassName,
-                        classByteArray,
-                        0,
-                        classByteArray.length
-                );
-            } finally {
-                defineClassMethod.setAccessible(acc);
-            }
-        }
-
-    }
+//    public static Class<?> defineClass(final ClassLoader loader,
+//                                       final String javaClassName,
+//                                       final byte[] classByteArray) throws InvocationTargetException, IllegalAccessException {
+//
+//        final Method defineClassMethod =
+//                unCaughtGetClassDeclaredJavaMethod(ClassLoader.class, "defineClass", String.class, byte[].class, int.class, int.class);
+//
+//        synchronized (defineClassMethod) {
+//            final boolean acc = defineClassMethod.isAccessible();
+//            try {
+//                defineClassMethod.setAccessible(true);
+//                return (Class<?>) defineClassMethod.invoke(
+//                        loader,
+//                        javaClassName,
+//                        classByteArray,
+//                        0,
+//                        classByteArray.length
+//                );
+//            } finally {
+//                defineClassMethod.setAccessible(acc);
+//            }
+//        }
+//
+//    }
 
 //    /**
 //     * 判断是否是中断式事件处理器

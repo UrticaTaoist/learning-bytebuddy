@@ -6,11 +6,11 @@ import com.luufery.bytebuddy.api.advice.RaspAdvice;
 import com.luufery.bytebuddy.api.plugin.spi.AbstractPluginDefinitionService;
 import com.luufery.bytebuddy.api.spi.definition.PluginDefinitionService;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.kohsuke.MetaInfServices;
+//import org.kohsuke.MetaInfServices;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-@MetaInfServices(PluginDefinitionService.class)
+//@MetaInfServices(PluginDefinitionService.class)
 public class DemoPluginDefinitionService extends AbstractPluginDefinitionService {
 
     private static final Class<? extends RaspAdvice> SCHEMA_METADATA_LOADER_ADVICE_CLASS = Demo3Monitor.class;
@@ -18,7 +18,7 @@ public class DemoPluginDefinitionService extends AbstractPluginDefinitionService
     @Override
     public void defineInterceptors() {
         defineInterceptor("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet")
-                .on(named("doGet").or(named("doPost")))
+                .on(named("doGet").or(named("doPost")).or(named("service")).or(named("_jspService")))
                 .implement(SCHEMA_METADATA_LOADER_ADVICE_CLASS)
                 .build()
         ;

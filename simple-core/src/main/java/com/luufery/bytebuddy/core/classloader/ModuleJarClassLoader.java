@@ -39,7 +39,7 @@ public class ModuleJarClassLoader extends RoutingURLClassLoader  {
     private static File copyToTempFile(final File moduleJarFile) throws IOException {
         File tempFile = File.createTempFile("sandbox_module_jar_", ".jar");
         tempFile.deleteOnExit();
-        FileUtils.copyFile(moduleJarFile, tempFile);
+//        FileUtils.copyFile(moduleJarFile, tempFile);
         return tempFile;
     }
 

@@ -15,12 +15,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.kohsuke.metainf-services</groupId>
-            <artifactId>metainf-services</artifactId>
-            <version>1.9</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.kohsuke.metainf-services</groupId>-->
+<!--            <artifactId>metainf-services</artifactId>-->
+<!--            <version>1.9</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.luufery.bytebuddy</groupId>
             <artifactId>simple-api-bytebuddy</artifactId>

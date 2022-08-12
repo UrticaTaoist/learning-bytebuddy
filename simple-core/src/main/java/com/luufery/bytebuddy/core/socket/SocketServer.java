@@ -63,16 +63,19 @@ public class SocketServer {
 
         System.out.println("启动socket server!!");
 
-        Thread thread = new Thread(() -> {
-            try {
-                server = new ServerSocket(18018);
-                read(server.accept());
-            } catch (IOException e) {
-                e.printStackTrace();
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    server = new ServerSocket(18018);
+                    read(server.accept());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //这里暂时先这样,还得改.
+                coreModuleManager = new DefaultCoreModuleManager();
             }
-            //这里暂时先这样,还得改.
-            coreModuleManager = new DefaultCoreModuleManager();
-        });
+        };
         thread.setDaemon(true);
         thread.start();
 
@@ -131,17 +134,13 @@ public class SocketServer {
             String[] split = key.split(":");
             String action = split[0];
             String plugin = split[1];
-            switch (action) {
-                case "load": {
-                    ModuleJarLoader.getInstance().load(plugin);
+            if (action.equals("load")) {
+                ModuleJarLoader.getInstance().load(plugin);
 
-                    break;
-                }
-                case "unload": {
-                    ModuleJarLoader.getInstance().unload(plugin);
-
-                }
+            } else if (action.equals("unload")) {
+                ModuleJarLoader.getInstance().unload(plugin);
             }
+
         } catch (IOException e) {
             System.out.println("============");
             System.out.println(e.getMessage());

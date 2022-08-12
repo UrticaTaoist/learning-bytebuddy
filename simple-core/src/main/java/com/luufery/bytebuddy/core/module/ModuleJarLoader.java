@@ -20,7 +20,7 @@ import static com.luufery.bytebuddy.core.socket.SocketServer.instrumentation;
 public class ModuleJarLoader {
     private Class<?> cache;
 
-    private static final Map<String, CoreModule> coreModuleMap = new HashMap<>();
+    private static final Map<String, CoreModule> coreModuleMap = new HashMap<String, CoreModule>();
 
     private static volatile ModuleJarLoader loader;
 
@@ -49,8 +49,10 @@ public class ModuleJarLoader {
         ModuleJarClassLoader moduleJarClassLoader = new ModuleJarClassLoader(file);
         ServiceLoader<PluginDefinitionService> services = ServiceLoader.load(PluginDefinitionService.class, moduleJarClassLoader);
 
-        for (PluginDefinitionService next : services) {
 
+        System.out.println("没有???");
+        for (PluginDefinitionService next : services) {
+            System.out.println(next.getType());
             CoreModule coreModule = next.load(instrumentation);
 //          instrumentation.addTransformer(coreModule.getTransformer(), true);
             try {

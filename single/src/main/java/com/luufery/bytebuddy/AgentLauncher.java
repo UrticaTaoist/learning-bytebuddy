@@ -21,43 +21,46 @@ public class AgentLauncher {
 
     public static void install() {
         try {
-            for (Class<?> clazz : Bootstrap.instrumentation.getAllLoadedClasses()) {
-                if (clazz.getName().contains("Files")) {
-                    System.out.println("找到啦");
-                }
-            }
-            Class<?> aClass;
-            Class<?> bClass;
-
-            aClass = Class.forName("java.nio.file.Files");
-            bClass = Class.forName("java.nio.file.Files");
             ElementMatcher.Junction<TypeDescription> subTypeOf = null;
 
-            System.out.println(aClass.getName());
             AgentBuilder agentBuilder = new AgentBuilder.Default(new ByteBuddy());
 //            ClassFileTransformer transformer =
+            Class<?>[] allLoadedClasses = Bootstrap.instrumentation.getAllLoadedClasses();
+            System.out.println("????");
             agentBuilder = agentBuilder
                     .with(new AgentListener())
-                    .with(AgentBuilder.InjectionStrategy.Disabled.INSTANCE)
+//                    .with(AgentBuilder.InjectionStrategy.Disabled.INSTANCE)
                     .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
 //                    .with(AgentBuilder.Listener.StreamWriting.toSystemOut())
                     .ignore(none())
                     .disableClassFormatChanges();
 
-            agentBuilder = agentBuilder.type(ElementMatchers.named("java.nio.file.Files"))
+//            agentBuilder = agentBuilder.type(ElementMatchers.named("java.nio.file.Files"))
+//
+//                    .transform(new AgentBuilder.Transformer() {
+//                        @Override
+//                        public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+//                            return builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("newOutputStream")));
+//                        }
+//                    })
+//            ;
+//            agentBuilder = agentBuilder.type(ElementMatchers.named("com.luufery.rasp.test.SimpleController"))
+//                    .transform(new AgentBuilder.Transformer() {
+//                        @Override
+//                        public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+//                            return builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("test")));
+//                        }
+//                    })
+//
+//            ;
 
-                    .transform((builder, typeDescription, classLoader, module)
-                            -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("newOutputStream"))))
-            ;
-            agentBuilder = agentBuilder.type(ElementMatchers.named("com.luufery.rasp.test.SimpleController"))
-                    .transform((builder, typeDescription, classLoader, module)
-                            -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("test"))))
-
-            ;
-
-            agentBuilder = agentBuilder.type(isSupersTypeOf("jakarta.servlet.http.HttpServlet", "javax.servlet.http.HttpServlet"))
-                    .transform((builder, typeDescription, classLoader, module)
-                            -> builder.visit(Advice.to(DemoMonitor.class).on(ElementMatchers.named("doGet").or(ElementMatchers.named("doPost")))))
+            agentBuilder = agentBuilder.type(typeMatch(allLoadedClasses, new String[]{"jakarta.servlet.http.HttpServlet","javax.servlet.http.HttpServlet"}))
+                    .transform(new AgentBuilder.Transformer() {
+                        @Override
+                        public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                            return builder.visit(Advice.to(DemoMonitor.class).on(named("doGet").or(named("doPost")).or(named("service")).or(named("_jspService"))));
+                        }
+                    })
             ;
             agentBuilder.installOn(Bootstrap.instrumentation);
         } catch (Exception e) {
@@ -65,13 +68,41 @@ public class AgentLauncher {
         }
     }
 
-    private static ElementMatcher.Junction<TypeDescription> isSupersTypeOf(String... classes) {
-        ElementMatcher.Junction<TypeDescription> subTypeOf = ElementMatchers.is(Object.class);
-        for (String clazzName : classes) {
-            Class<?> load = load(clazzName);
-            if (load != null) {
-                subTypeOf = subTypeOf.or(ElementMatchers.isSuperTypeOf(load));
+    public static ElementMatcher.Junction<TypeDescription> typeMatch(Class<?>[] allLoadedClasses, String[] names) {
+        ElementMatcher.Junction<TypeDescription> elementMatcher = ElementMatchers.none();
+
+        //TODO 这里是过程化的,应该抽象
+        for (String name : names) {
+            for (Class<?> loaded : allLoadedClasses) {
+                ElementMatcher.Junction<TypeDescription> subsTypeOf = isSubsTypeOf(loaded, name);
+                if (subsTypeOf != null && !subsTypeOf.equals(ElementMatchers.none())) {
+                    elementMatcher = elementMatcher.or(subsTypeOf);
+                }
+                ElementMatcher.Junction<TypeDescription> supersTypeOf = isSupersTypeOf(loaded, name);
+                if (supersTypeOf != null && !supersTypeOf.equals(ElementMatchers.none())) {
+                    elementMatcher = elementMatcher.or(supersTypeOf);
+                }
+
             }
+            elementMatcher = elementMatcher.or(ElementMatchers.named(name));
+
+        }
+        return elementMatcher;
+    }
+
+
+    public static ElementMatcher.Junction<TypeDescription> isSubsTypeOf(Class<?> loadedClass, String clazzName) {
+        ElementMatcher.Junction<TypeDescription> subTypeOf = ElementMatchers.none();
+        if (loadedClass.getName().equals(clazzName)) {
+            subTypeOf = subTypeOf.or(ElementMatchers.isSubTypeOf(loadedClass));
+        }
+        return subTypeOf;
+    }
+
+    public static ElementMatcher.Junction<TypeDescription> isSupersTypeOf(Class<?> loadedClass, String clazzName) {
+        ElementMatcher.Junction<TypeDescription> subTypeOf = ElementMatchers.none();
+        if (loadedClass.getName().equals(clazzName)) {
+            subTypeOf = subTypeOf.or(ElementMatchers.isSuperTypeOf(loadedClass));
         }
         return subTypeOf;
     }
